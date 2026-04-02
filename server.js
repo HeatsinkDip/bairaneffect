@@ -92,8 +92,12 @@ function generateRequestId() {
 }
 
 async function uploadToStoreFile(filePath, userId) {
-  const url = process.env.PORT;
+  const url = process.env.STORAGE_URL;
   
+  if (!url) {
+    throw new Error('STORAGE_URL environment variable is not defined');
+  }
+
   return new Promise((resolve, reject) => {
     const form = new FormData();
     form.append('file', fs.createReadStream(filePath));
