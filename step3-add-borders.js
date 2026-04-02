@@ -13,9 +13,9 @@ if (!fs.existsSync(OUTPUT_DIR)) {
 
 // Border configuration - PROFESSIONAL STICKER EFFECT
 // Order: Subject → White (inner)
-const WHITE_INNER_THICKNESS = 2;
-const BLACK_THICKNESS = 0;
-const WHITE_OUTER_THICKNESS = 0;
+const WHITE_INNER_THICKNESS = 3;
+const BLACK_THICKNESS = 3;
+const WHITE_OUTER_THICKNESS = 3;
 
 async function createStickerEffect(imagePath, outputPath) {
   console.log('Creating professional sticker effect with multiple borders...');

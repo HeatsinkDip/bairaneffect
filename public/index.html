@@ -1,0 +1,937 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bairan Effect Studio | Premium</title>
+
+    <!-- Premium Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <!-- Tailwind Config & Custom CSS -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+                    },
+                    colors: {
+                        glass: {
+                            100: 'rgba(255, 255, 255, 0.6)',
+                            200: 'rgba(255, 255, 255, 0.8)',
+                            stroke: 'rgba(0, 0, 0, 0.05)'
+                        },
+                        accent: {
+                            DEFAULT: '#7C3AED', // Violet 600
+                            glow: '#DDD6FE'
+                        }
+                    },
+                    animation: {
+                        'float': 'float 12s ease-in-out infinite',
+                        'float-delayed': 'float 12s ease-in-out 6s infinite',
+                        'fade-in-up': 'fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+                            '50%': { transform: 'translate(20px, -20px) scale(1.05)' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #F8FAFC; /* Slate 50 */
+            color: #0F172A; /* Slate 900 */
+            overflow-x: hidden;
+        }
+
+        /* Light Glassmorphism Utilities */
+        .glass-panel {
+            background: linear-gradient(145deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.5) 100%);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--tw-colors-glass-stroke);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.03), inset 0 1px 0 rgba(255,255,255,1);
+        }
+
+        .glass-header {
+            background: rgba(248, 250, 252, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+
+        .glass-button {
+            background: rgba(255,255,255,0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,0,0,0.1);
+            color: #1E293B;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+        }
+        .glass-button:hover {
+            background: rgba(255,255,255,1);
+            border-color: rgba(0,0,0,0.15);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* Primary Gradient Button */
+        .btn-primary {
+            background: linear-gradient(135deg, #7C3AED 0%, #2563EB 100%);
+            box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.4);
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            color: white;
+        }
+        .btn-primary:hover {
+            box-shadow: 0 15px 35px -5px rgba(124, 58, 237, 0.6);
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+        }
+        .btn-primary:active {
+            transform: translateY(0);
+        }
+
+        /* Ambient Background Orbs (Pastel for light mode) */
+        .ambient-orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(100px);
+            z-index: -1;
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        /* Custom Scrollbar */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.02);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.15);
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: rgba(0,0,0,0.25);
+        }
+
+        .drop-active {
+            border-color: #7C3AED !important;
+            background: rgba(124, 58, 237, 0.05) !important;
+        }
+
+        .trim-marker {
+            position: absolute;
+            height: 100%;
+            width: 4px;
+            background: #fff;
+            box-shadow: 0 0 8px rgba(0,0,0,0.2), inset 0 0 0 1px #7C3AED;
+            top: 0;
+            z-index: 10;
+        }
+
+        /* Video Card Hover Effects */
+        .video-card-hover .play-btn {
+            transform: scale(0.9);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .video-card-hover:hover .play-btn {
+            transform: scale(1.1);
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.6);
+        }
+        .video-card-hover:hover .play-btn svg {
+            fill: #7C3AED;
+            color: #7C3AED;
+        }
+        .video-card-hover img {
+            transition: transform 0.7s ease;
+        }
+        .video-card-hover:hover img {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body class="min-h-screen relative font-sans antialiased selection:bg-accent selection:text-white flex flex-col">
+
+    <!-- Ambient Background Effects -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="ambient-orb bg-violet-200 w-[700px] h-[700px] top-[-20%] left-[-10%] animate-float"></div>
+        <div class="ambient-orb bg-blue-200 w-[600px] h-[600px] bottom-[-10%] right-[-5%] animate-float-delayed"></div>
+        <!-- Light Noise Overlay -->
+        <div class="absolute inset-0 opacity-[0.25] mix-blend-multiply" style="background-image: url('data:image/svg+xml,%3Csvg viewBox=%220 0 200 200%22 xmlns=%22http://www.w3.org/2000/svg%22%3E%3Cfilter id=%22noiseFilter%22%3E%3CfeTurbulence type=%22fractalNoise%22 baseFrequency=%220.8%22 numOctaves=%223%22 stitchTiles=%22stitch%22/%3E%3C/filter%3E%3Crect width=%22100%25%22 height=%22100%25%22 filter=%22url(%23noiseFilter)%22/%3E%3C/svg%3E');"></div>
+    </div>
+
+    <!-- Global Header -->
+    <header class="fixed top-0 w-full z-50 glass-header transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <!-- Logo -->
+            <div class="flex items-center gap-3 cursor-pointer group">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center shadow-md group-hover:shadow-violet-500/25 transition-all">
+                    <i data-lucide="video" class="w-5 h-5 text-white"></i>
+                </div>
+                <span class="text-xl font-bold tracking-tight text-slate-800 group-hover:text-violet-600 transition-colors">Bairan<span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600">Studio</span></span>
+            </div>
+
+            <!-- Navigation Links (Simplified) -->
+            <nav class="hidden md:flex items-center gap-8">
+                <a href="#" class="text-sm font-semibold text-slate-600 hover:text-violet-600 transition-colors">Features</a>
+                <a href="#samples" class="text-sm font-semibold text-slate-600 hover:text-violet-600 transition-colors">Gallery</a>
+            </nav>
+
+            <!-- Actions -->
+            <div class="flex items-center gap-4">
+                <button class="btn-primary px-6 py-2.5 rounded-xl text-sm font-bold shadow-md">Get Pro</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Wrapper -->
+    <main class="relative z-10 flex-grow pt-24 pb-8 w-full">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col gap-6">
+            
+            <!-- Hero Intro -->
+            <section class="text-center space-y-4 animate-fade-in-up">
+                <!-- <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/60 backdrop-blur-md border border-slate-200 text-xs font-bold tracking-widest text-violet-600 uppercase mb-2 shadow-sm">
+                    <i data-lucide="sparkles" class="w-4 h-4"></i>
+                    AI-Powered Composition
+                </div> -->
+                <h1 class="text-2xl md:text-4xl lg:text-5xl font-extrabold tracking-tight leading-tight text-slate-900">
+                    Compose <span class="text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-blue-600">Cinematic</span><br/>Videos in Seconds
+                </h1>
+                <p class="text-slate-600 max-w-1xl mx-auto text-lg pt-2 font-medium">
+                    Upload a primary clip, drop in your photos, set your points, and let our engine synthesize a brilliant, professional masterpiece.
+                </p>
+            </section>
+
+            <!-- Workspace Grid -->
+            <section class="grid grid-cols-1 lg:grid-cols-12 gap-6 relative z-20">
+                
+                <!-- Left Column: Video Input & Trimmer (7 cols) -->
+                <div class="lg:col-span-7 space-y-4 animate-fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="glass-panel rounded-3xl p-5 h-full flex flex-col">
+                        <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+                            <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800">
+                                <i data-lucide="film" class="text-violet-500"></i> Main Video
+                            </h2>
+                            <button id="reset-video" class="hidden text-sm text-slate-500 hover:text-slate-900 transition-colors flex items-center gap-1 bg-white px-3 py-1.5 rounded-lg border border-slate-200 shadow-sm hover:bg-slate-50">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Replace
+                            </button>
+                        </div>
+
+                        <!-- Video Dropzone -->
+                        <div id="video-dropzone" class="flex-1 flex flex-col items-center justify-center border-2 border-dashed border-slate-300 rounded-2xl bg-white/40 hover:bg-white/80 hover:border-violet-400 transition-all cursor-pointer min-h-[350px] relative overflow-hidden group shadow-inner">
+                            <input type="file" id="video-input" accept="video/mp4,video/quicktime,video/x-msvideo" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            <div class="bg-white p-5 rounded-2xl mb-4 group-hover:-translate-y-2 group-hover:shadow-lg border border-slate-100 shadow-sm transition-all duration-300">
+                                <i data-lucide="upload-cloud" class="w-10 h-10 text-violet-500"></i>
+                            </div>
+                            <p class="text-xl font-bold text-slate-700">Drag & drop your video here</p>
+                            <p class="text-sm text-slate-500 mt-2 font-medium">Supports MP4, MOV, AVI up to 500MB</p>
+                            <button class="mt-8 px-8 py-3 rounded-xl glass-button text-sm font-bold shadow-sm">Browse Files</button>
+                        </div>
+
+                        <!-- Video Player & Trimmer UI (Hidden initially) -->
+                        <div id="video-workspace" class="hidden flex-col gap-5">
+                            <div class="relative rounded-2xl overflow-hidden bg-slate-900 aspect-video shadow-xl border border-slate-200 group">
+                                <video id="main-video-player" class="w-full h-full object-contain" playsinline></video>
+                                
+                                <!-- Custom Play/Pause Overlay -->
+                                <div id="play-overlay" class="absolute inset-0 flex items-center justify-center bg-slate-900/20 opacity-0 group-hover:opacity-100 transition-all cursor-pointer backdrop-blur-[2px]">
+                                    <div class="bg-white/90 backdrop-blur-md p-5 rounded-full border border-white/50 shadow-xl transform group-hover:scale-105 transition-transform">
+                                        <i data-lucide="play" id="play-icon" class="w-10 h-10 text-violet-600 fill-violet-600 ml-1"></i>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Simple Trimmer Controls -->
+                            <div class="bg-white/80 rounded-2xl p-5 border border-slate-200 shadow-sm space-y-4">
+                                <div class="flex items-center justify-between text-sm font-bold text-slate-700 pb-2 border-b border-slate-100">
+                                    <span>Trim Video</span>
+                                    <span id="selected-duration" class="font-mono text-violet-600 bg-violet-50 px-2 py-1 rounded-md border border-violet-100">00:00.0</span>
+                                </div>
+                                <div class="space-y-4">
+                                    <div>
+                                        <div class="flex justify-between text-xs font-mono text-slate-500 mb-2">
+                                            <span>Start: <span id="trim-start-label" class="text-slate-800 font-bold">0.0s</span></span>
+                                        </div>
+                                        <input type="range" id="trim-start" class="w-full accent-violet-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" min="0" max="100" step="0.1" value="0">
+                                    </div>
+                                    <div>
+                                        <div class="flex justify-between text-xs font-mono text-slate-500 mb-2">
+                                            <span>End: <span id="trim-end-label" class="text-slate-800 font-bold">0.0s</span></span>
+                                        </div>
+                                        <input type="range" id="trim-end" class="w-full accent-violet-600 h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer" min="0" max="100" step="0.1" value="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column: Photos Input (5 cols) -->
+                <div class="lg:col-span-5 space-y-4 animate-fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="glass-panel rounded-3xl p-5 h-full flex flex-col">
+                        <div class="flex items-center justify-between mb-6 border-b border-slate-100 pb-4">
+                            <h2 class="text-xl font-bold flex items-center gap-2 text-slate-800">
+                                <i data-lucide="images" class="text-blue-500"></i> Slideshow Photos
+                            </h2>
+                            <span id="photo-count" class="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-600 rounded-full text-xs font-bold shadow-sm">0 added</span>
+                        </div>
+
+                        <!-- Photo Dropzone -->
+                        <div id="photo-dropzone" class="border-2 border-dashed border-slate-300 rounded-2xl bg-white/40 hover:bg-white/80 hover:border-blue-400 transition-all cursor-pointer p-6 relative group text-center mb-5 shadow-inner">
+                            <input type="file" id="photos-input" accept="image/*" multiple class="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10" />
+                            <div class="flex justify-center mb-3">
+                                <div class="bg-white p-3 rounded-full border border-slate-100 shadow-sm group-hover:-translate-y-1 transition-transform">
+                                    <i data-lucide="plus-circle" class="w-6 h-6 text-blue-500"></i>
+                                </div>
+                            </div>
+                            <p class="text-sm font-bold text-slate-700">Click or drag photos to add</p>
+                        </div>
+
+                        <!-- Photo Grid Preview -->
+                        <div id="photo-grid" class="flex-1 grid grid-cols-2 gap-4 overflow-y-auto custom-scrollbar pr-2 min-h-[300px] max-h-[550px] content-start">
+                            <!-- Empty State -->
+                            <div id="photo-empty-state" class="col-span-2 flex flex-col items-center justify-center text-slate-400 py-10 opacity-80">
+                                <div class="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-3 shadow-sm border border-slate-200">
+                                    <i data-lucide="image-off" class="w-8 h-8 text-slate-400"></i>
+                                </div>
+                                <p class="text-sm font-bold text-slate-500">No photos selected yet</p>
+                            </div>
+                            <!-- Images will be injected here -->
+                        </div>
+
+                        <div class="mt-5 pt-5 border-t border-slate-100 flex justify-between items-center">
+                            <button id="clear-photos-btn" class="text-sm text-red-500 hover:text-red-600 transition-colors opacity-0 pointer-events-none flex items-center gap-1 font-bold bg-red-50 px-3 py-1.5 rounded-lg border border-red-100 hover:bg-red-100 shadow-sm">
+                                <i data-lucide="trash" class="w-4 h-4"></i> Clear All
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Action Bar (Sticky) -->
+            <section class="glass-panel rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4 animate-fade-in-up sticky bottom-6 z-40 border border-slate-200" style="animation-delay: 0.3s;" id="action-bar">
+                <div class="flex items-center gap-3 pl-3">
+                    <div class="relative flex h-3 w-3">
+                        <span id="status-ping" class="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-75"></span>
+                        <span id="status-indicator" class="relative inline-flex rounded-full h-3 w-3 bg-slate-400"></span>
+                    </div>
+                    <p id="status-text" class="text-sm font-bold text-slate-600 tracking-wide">Awaiting media files...</p>
+                </div>
+                
+                <button id="compose-btn" disabled class="btn-primary px-10 py-3.5 rounded-xl font-bold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none disabled:shadow-none flex items-center gap-2 w-full sm:w-auto justify-center text-base">
+                    <i data-lucide="wand-2" class="w-5 h-5"></i> Compose Masterpiece
+                </button>
+            </section>
+
+            <!-- Result Video Section (Hidden initially) -->
+            <section id="result-section" class="hidden glass-panel rounded-3xl p-6 sm:p-8 animate-fade-in-up border-2 border-violet-200 bg-violet-50/30">
+                <div class="flex flex-col md:flex-row gap-8 items-center">
+                    <div class="flex-1 w-full relative">
+                        <div class="bg-black rounded-2xl overflow-hidden aspect-video relative border border-slate-200 shadow-2xl">
+                            <video id="result-video-player" class="w-full h-full object-contain" controls playsinline></video>
+                        </div>
+                    </div>
+                    <div class="md:w-1/3 flex flex-col justify-center space-y-6">
+                        <div>
+                            <h3 class="text-2xl font-extrabold text-slate-800 flex items-center gap-2 mb-2">
+                                <i data-lucide="check-circle-2" class="text-green-500 w-8 h-8"></i>
+                                Success!
+                            </h3>
+                            <p class="text-slate-600 font-medium">Your cinematic video is ready. Review your masterpiece and download it in full quality.</p>
+                        </div>
+                        <div class="space-y-3">
+                            <button id="download-result-btn" class="btn-primary w-full py-4 rounded-xl font-bold flex justify-center items-center gap-2 shadow-lg shadow-violet-500/25 text-lg">
+                                <i data-lucide="download"></i> Download Video
+                            </button>
+                            <button id="create-another-btn" class="glass-button w-full py-3.5 rounded-xl font-bold text-slate-600 hover:text-slate-900 border-slate-200">
+                                Create Another
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Divider -->
+            <div class="h-px w-full bg-gradient-to-r from-transparent via-slate-200 to-transparent my-4"></div>
+
+            <!-- Sample Videos / Inspiration Gallery -->
+            <section id="samples" class="animate-fade-in-up space-y-8 pt-4" style="animation-delay: 0.4s;">
+                <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                    <div>
+                        <h2 class="text-3xl font-extrabold mb-2 text-slate-900">Inspiration Gallery</h2>
+                        <p class="text-slate-500 font-medium">Discover what you can create with Bairan Effect Studio.</p>
+                    </div>
+                    <button class="text-sm font-bold text-violet-600 hover:text-violet-700 flex items-center gap-1 transition-colors bg-violet-50 px-4 py-2 rounded-lg border border-violet-100">
+                        View all templates <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Sample Card 1 -->
+                    <article class="glass-panel rounded-2xl overflow-hidden border border-slate-200 group cursor-pointer video-card-hover flex flex-col">
+                        <div class="relative aspect-video overflow-hidden bg-slate-900">
+                            <!-- High-quality Unsplash placeholder simulating a video frame -->
+                            <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?q=80&w=2070&auto=format&fit=crop" alt="Portrait Social Reel" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            
+                            <!-- Custom Play Button Overlay -->
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="play-btn w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-xl text-white">
+                                    <i data-lucide="play" class="w-6 h-6 fill-white ml-1"></i>
+                                </div>
+                            </div>
+                            <!-- Length Badge -->
+                            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-xs font-mono px-2 py-1 rounded text-white font-medium">00:15</div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between bg-white">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800 mb-1">Dynamic Social Reel</h3>
+                                <p class="text-sm text-slate-500 line-clamp-2 font-medium">High-energy edits with fast zoom transitions, perfect for Instagram Reels and TikTok storytelling.</p>
+                            </div>
+                            <div class="mt-4 flex items-center gap-2">
+                                <span class="text-xs bg-violet-50 text-violet-700 px-2.5 py-1 rounded-md font-bold border border-violet-200">Portrait Mode</span>
+                                <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-bold border border-slate-200">Fast Cuts</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Sample Card 2 -->
+                    <article class="glass-panel rounded-2xl overflow-hidden border border-slate-200 group cursor-pointer video-card-hover flex flex-col">
+                        <div class="relative aspect-video overflow-hidden bg-slate-900">
+                            <img src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=2070&auto=format&fit=crop" alt="Product Highlight" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="play-btn w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-xl text-white">
+                                    <i data-lucide="play" class="w-6 h-6 fill-white ml-1"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-xs font-mono px-2 py-1 rounded text-white font-medium">00:30</div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between bg-white">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800 mb-1">Cinematic Product Promo</h3>
+                                <p class="text-sm text-slate-500 line-clamp-2 font-medium">Clean, layered composition where products stay visually prominent against blurred backgrounds.</p>
+                            </div>
+                            <div class="mt-4 flex items-center gap-2">
+                                <span class="text-xs bg-blue-50 text-blue-700 px-2.5 py-1 rounded-md font-bold border border-blue-200">Landscape</span>
+                                <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-bold border border-slate-200">Elegant</span>
+                            </div>
+                        </div>
+                    </article>
+
+                    <!-- Sample Card 3 -->
+                    <article class="glass-panel rounded-2xl overflow-hidden border border-slate-200 group cursor-pointer video-card-hover flex flex-col">
+                        <div class="relative aspect-video overflow-hidden bg-slate-900">
+                            <img src="https://images.unsplash.com/photo-1459749411175-04bf5292ceea?q=80&w=2070&auto=format&fit=crop" alt="Event Recap" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity" />
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+                            
+                            <div class="absolute inset-0 flex items-center justify-center">
+                                <div class="play-btn w-14 h-14 rounded-full bg-white/20 backdrop-blur-md border border-white/30 flex items-center justify-center shadow-xl text-white">
+                                    <i data-lucide="play" class="w-6 h-6 fill-white ml-1"></i>
+                                </div>
+                            </div>
+                            <div class="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-xs font-mono px-2 py-1 rounded text-white font-medium">00:45</div>
+                        </div>
+                        <div class="p-5 flex-1 flex flex-col justify-between bg-white">
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-800 mb-1">Event Recap Slideshow</h3>
+                                <p class="text-sm text-slate-500 line-clamp-2 font-medium">Mix a single atmospheric establishing shot with dozens of rapid-fire photos synced to a beat.</p>
+                            </div>
+                            <div class="mt-4 flex items-center gap-2">
+                                <span class="text-xs bg-green-50 text-green-700 px-2.5 py-1 rounded-md font-bold border border-green-200">Square</span>
+                                <span class="text-xs bg-slate-100 text-slate-600 px-2.5 py-1 rounded-md font-bold border border-slate-200">Slideshow</span>
+                            </div>
+                        </div>
+                    </article>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <!-- Global Footer (Cleaned Up) -->
+    <footer class="border-t border-slate-200 bg-slate-50/80 backdrop-blur-lg relative z-10 pt-16 pb-8 mt-12">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex flex-col md:flex-row justify-between gap-12 mb-12">
+                
+                <!-- Brand Column -->
+                <div class="max-w-sm">
+                    <div class="flex items-center gap-2 mb-4">
+                        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-blue-600 flex items-center justify-center shadow-md">
+                            <i data-lucide="video" class="w-4 h-4 text-white"></i>
+                        </div>
+                        <span class="text-lg font-bold tracking-tight text-slate-800">Bairan Studio</span>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-6 font-medium leading-relaxed">
+                        The ultimate web-based tool for composing cinematic videos from single clips and dynamic photo arrays.
+                    </p>
+                    <div class="flex items-center gap-4">
+                        <a href="#" class="text-slate-400 hover:text-violet-600 transition-colors"><i data-lucide="twitter" class="w-5 h-5"></i></a>
+                        <a href="#" class="text-slate-400 hover:text-violet-600 transition-colors"><i data-lucide="instagram" class="w-5 h-5"></i></a>
+                        <a href="#" class="text-slate-400 hover:text-violet-600 transition-colors"><i data-lucide="github" class="w-5 h-5"></i></a>
+                    </div>
+                </div>
+
+                <!-- Legal/Links Column -->
+                <div class="flex gap-16">
+                    <div>
+                        <h4 class="text-slate-800 font-bold mb-4">Product</h4>
+                        <ul class="space-y-3 text-sm text-slate-500 font-medium">
+                            <li><a href="#" class="hover:text-violet-600 transition-colors">Editor Workspace</a></li>
+                            <li><a href="#samples" class="hover:text-violet-600 transition-colors">Template Gallery</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div>
+                        <h4 class="text-slate-800 font-bold mb-4">Legal</h4>
+                        <ul class="space-y-3 text-sm text-slate-500 font-medium">
+                            <li><a href="#" class="hover:text-violet-600 transition-colors">Terms of Service</a></li>
+                            <li><a href="#" class="hover:text-violet-600 transition-colors">Privacy Policy</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="border-t border-slate-200 pt-8 flex flex-col md:flex-row items-center justify-between gap-4">
+                <p class="text-sm text-slate-500 font-medium">© 2026 Bairan Effect Studio. All rights reserved.</p>
+                <div class="flex items-center gap-2 text-sm text-slate-500 font-medium">
+                    <span>Designed with</span>
+                    <i data-lucide="heart" class="w-4 h-4 text-red-500 fill-red-500/20"></i>
+                    <span>for creators.</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Application Logic -->
+    <script>
+        // Initialize Icons
+        lucide.createIcons();
+
+        // State
+        const state = {
+            videoFile: null,
+            videoDuration: 0,
+            markIn: 0,
+            markOut: 0,
+            photos: [],
+            isPlaying: false
+        };
+
+        // DOM Elements
+        const DOM = {
+            videoInput: document.getElementById('video-input'),
+            videoDropzone: document.getElementById('video-dropzone'),
+            videoWorkspace: document.getElementById('video-workspace'),
+            videoPlayer: document.getElementById('main-video-player'),
+            resetVideoBtn: document.getElementById('reset-video'),
+            playOverlay: document.getElementById('play-overlay'),
+            playIcon: document.getElementById('play-icon'),
+            
+            photosInput: document.getElementById('photos-input'),
+            photoDropzone: document.getElementById('photo-dropzone'),
+            photoGrid: document.getElementById('photo-grid'),
+            photoEmptyState: document.getElementById('photo-empty-state'),
+            photoCount: document.getElementById('photo-count'),
+            clearPhotosBtn: document.getElementById('clear-photos-btn'),
+            
+            selectedDuration: document.getElementById('selected-duration'),
+            trimStart: document.getElementById('trim-start'),
+            trimEnd: document.getElementById('trim-end'),
+            trimStartLabel: document.getElementById('trim-start-label'),
+            trimEndLabel: document.getElementById('trim-end-label'),
+
+            composeBtn: document.getElementById('compose-btn'),
+            statusText: document.getElementById('status-text'),
+            statusIndicator: document.getElementById('status-indicator'),
+            statusPing: document.getElementById('status-ping'),
+
+            resultSection: document.getElementById('result-section'),
+            resultVideoPlayer: document.getElementById('result-video-player'),
+            downloadResultBtn: document.getElementById('download-result-btn'),
+            createAnotherBtn: document.getElementById('create-another-btn'),
+            actionBar: document.getElementById('action-bar')
+        };
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-md', 'bg-white/90');
+                header.classList.remove('bg-slate-50/70');
+            } else {
+                header.classList.remove('shadow-md', 'bg-white/90');
+                header.classList.add('bg-slate-50/70');
+            }
+        });
+
+        // Utilities
+        const formatTime = (seconds) => {
+            const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+            const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+            const ms = Math.floor((seconds % 1) * 10);
+            return `${m}:${s}.${ms}`;
+        };
+
+        // =========================================
+        // Video Handling
+        // =========================================
+        
+        const handleVideoFile = (file) => {
+            if (!file || !file.type.startsWith('video/')) {
+                alert('Please upload a valid video file.');
+                return;
+            }
+            
+            state.videoFile = file;
+            const url = URL.createObjectURL(file);
+            DOM.videoPlayer.src = url;
+            
+            // UI Switches
+            DOM.videoDropzone.classList.add('hidden');
+            DOM.videoWorkspace.classList.remove('hidden');
+            DOM.videoWorkspace.classList.add('flex');
+            DOM.resetVideoBtn.classList.remove('hidden');
+            
+            checkReadyState();
+        };
+
+        DOM.videoInput.addEventListener('change', (e) => handleVideoFile(e.target.files[0]));
+        
+        DOM.resetVideoBtn.addEventListener('click', () => {
+            state.videoFile = null;
+            DOM.videoPlayer.src = '';
+            DOM.videoInput.value = '';
+            DOM.videoWorkspace.classList.add('hidden');
+            DOM.videoWorkspace.classList.remove('flex');
+            DOM.videoDropzone.classList.remove('hidden');
+            DOM.resetVideoBtn.classList.add('hidden');
+            checkReadyState();
+        });
+
+        // Drag and Drop (Video)
+        ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+            DOM.videoDropzone.addEventListener(eventName, preventDefaults, false);
+        });
+        function preventDefaults(e) { e.preventDefault(); e.stopPropagation(); }
+        
+        DOM.videoDropzone.addEventListener('dragover', () => DOM.videoDropzone.classList.add('drop-active'));
+        DOM.videoDropzone.addEventListener('dragleave', () => DOM.videoDropzone.classList.remove('drop-active'));
+        DOM.videoDropzone.addEventListener('drop', (e) => {
+            DOM.videoDropzone.classList.remove('drop-active');
+            handleVideoFile(e.dataTransfer.files[0]);
+        });
+
+        // =========================================
+        // Video Player & Trimmer Logic
+        // =========================================
+
+        DOM.videoPlayer.addEventListener('loadedmetadata', () => {
+            state.videoDuration = DOM.videoPlayer.duration;
+            state.markIn = 0;
+            state.markOut = state.videoDuration;
+            
+            DOM.trimStart.max = state.videoDuration;
+            DOM.trimEnd.max = state.videoDuration;
+            DOM.trimStart.value = 0;
+            DOM.trimEnd.value = state.videoDuration;
+            
+            updateSimpleTrimmer();
+        });
+
+        DOM.videoPlayer.addEventListener('timeupdate', () => {
+            const current = DOM.videoPlayer.currentTime;
+            
+            if (current >= state.markOut && state.isPlaying) {
+                DOM.videoPlayer.pause();
+                state.isPlaying = false;
+                DOM.playIcon.setAttribute('data-lucide', 'play');
+                DOM.playOverlay.classList.add('opacity-100');
+                DOM.playOverlay.classList.remove('opacity-0');
+                DOM.videoPlayer.currentTime = state.markIn;
+            }
+        });
+
+        const togglePlay = () => {
+            if (DOM.videoPlayer.paused) {
+                if (DOM.videoPlayer.currentTime >= state.markOut) {
+                    DOM.videoPlayer.currentTime = state.markIn;
+                }
+                DOM.videoPlayer.play();
+                state.isPlaying = true;
+                DOM.playIcon.setAttribute('data-lucide', 'pause');
+                DOM.playOverlay.classList.remove('opacity-100');
+                DOM.playOverlay.classList.add('opacity-0');
+            } else {
+                DOM.videoPlayer.pause();
+                state.isPlaying = false;
+                DOM.playIcon.setAttribute('data-lucide', 'play');
+                DOM.playOverlay.classList.add('opacity-100');
+                DOM.playOverlay.classList.remove('opacity-0');
+            }
+            lucide.createIcons();
+        };
+
+        DOM.playOverlay.addEventListener('click', togglePlay);
+        DOM.videoPlayer.addEventListener('click', togglePlay);
+
+        DOM.trimStart.addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            if (val >= state.markOut) {
+                val = Math.max(0, state.markOut - 0.1);
+                DOM.trimStart.value = val;
+            }
+            state.markIn = val;
+            DOM.videoPlayer.currentTime = val;
+            updateSimpleTrimmer();
+        });
+
+        DOM.trimEnd.addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            if (val <= state.markIn) {
+                val = Math.min(state.videoDuration, state.markIn + 0.1);
+                DOM.trimEnd.value = val;
+            }
+            state.markOut = val;
+            DOM.videoPlayer.currentTime = val;
+            updateSimpleTrimmer();
+        });
+
+        function updateSimpleTrimmer() {
+            DOM.trimStartLabel.innerText = formatTime(state.markIn);
+            DOM.trimEndLabel.innerText = formatTime(state.markOut);
+            DOM.selectedDuration.innerText = formatTime(state.markOut - state.markIn);
+        }
+
+        // =========================================
+        // Photos Handling
+        // =========================================
+
+        const handlePhotoFiles = (files) => {
+            const validFiles = Array.from(files).filter(f => f.type.startsWith('image/'));
+            
+            validFiles.forEach(file => {
+                state.photos.push({
+                    id: Math.random().toString(36).substr(2, 9),
+                    file: file,
+                    url: URL.createObjectURL(file)
+                });
+            });
+            
+            renderPhotos();
+            checkReadyState();
+            DOM.photosInput.value = '';
+        };
+
+        DOM.photosInput.addEventListener('change', (e) => handlePhotoFiles(e.target.files));
+
+        ['dragover', 'dragleave', 'drop'].forEach(eventName => {
+            DOM.photoDropzone.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        DOM.photoDropzone.addEventListener('dragover', () => DOM.photoDropzone.classList.add('drop-active'));
+        DOM.photoDropzone.addEventListener('dragleave', () => DOM.photoDropzone.classList.remove('drop-active'));
+        DOM.photoDropzone.addEventListener('drop', (e) => {
+            DOM.photoDropzone.classList.remove('drop-active');
+            handlePhotoFiles(e.dataTransfer.files);
+        });
+
+        // Make removePhoto global so inline onclick works
+        window.removePhoto = (id) => {
+            state.photos = state.photos.filter(p => p.id !== id);
+            renderPhotos();
+            checkReadyState();
+        };
+
+        const renderPhotos = () => {
+            const images = DOM.photoGrid.querySelectorAll('.photo-item');
+            images.forEach(img => img.remove());
+
+            DOM.photoCount.innerText = `${state.photos.length} added`;
+
+            if (state.photos.length === 0) {
+                DOM.photoEmptyState.classList.remove('hidden');
+                DOM.clearPhotosBtn.classList.add('opacity-0', 'pointer-events-none');
+                return;
+            }
+
+            DOM.photoEmptyState.classList.add('hidden');
+            DOM.clearPhotosBtn.classList.remove('opacity-0', 'pointer-events-none');
+
+            state.photos.forEach((photo, index) => {
+                const div = document.createElement('div');
+                div.className = 'photo-item relative rounded-xl overflow-hidden group bg-slate-100 border border-slate-200 shadow-sm animate-fade-in-up aspect-[4/3]';
+                div.style.animationDelay = `${index * 0.05}s`;
+                
+                div.innerHTML = `
+                    <img src="${photo.url}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" alt="Uploaded photo" />
+                    <div class="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                        <button onclick="window.removePhoto('${photo.id}')" class="bg-red-500 hover:bg-red-600 text-white p-2 rounded-full transform scale-90 group-hover:scale-100 transition-all shadow-lg border border-red-400">
+                            <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                `;
+                DOM.photoGrid.appendChild(div);
+            });
+            lucide.createIcons();
+        };
+
+        DOM.clearPhotosBtn.addEventListener('click', () => {
+            state.photos = [];
+            renderPhotos();
+            checkReadyState();
+        });
+
+
+        // =========================================
+        // Global State & Actions
+        // =========================================
+
+        const checkReadyState = () => {
+            const hasVideo = !!state.videoFile;
+            const hasPhotos = state.photos.length > 0;
+
+            DOM.statusPing.classList.remove('hidden');
+
+            if (hasVideo && hasPhotos) {
+                DOM.composeBtn.disabled = false;
+                DOM.statusIndicator.className = 'relative inline-flex rounded-full h-3 w-3 bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]';
+                DOM.statusPing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75';
+                DOM.statusText.innerText = 'Ready to compose';
+                DOM.statusText.className = 'text-sm font-bold text-green-600 tracking-wide';
+            } else if (hasVideo) {
+                DOM.composeBtn.disabled = true;
+                DOM.statusIndicator.className = 'relative inline-flex rounded-full h-3 w-3 bg-amber-500';
+                DOM.statusPing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75';
+                DOM.statusText.innerText = 'Waiting for photos...';
+                DOM.statusText.className = 'text-sm font-bold text-amber-600 tracking-wide';
+            } else if (hasPhotos) {
+                DOM.composeBtn.disabled = true;
+                DOM.statusIndicator.className = 'relative inline-flex rounded-full h-3 w-3 bg-amber-500';
+                DOM.statusPing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75';
+                DOM.statusText.innerText = 'Waiting for main video...';
+                DOM.statusText.className = 'text-sm font-bold text-amber-600 tracking-wide';
+            } else {
+                DOM.composeBtn.disabled = true;
+                DOM.statusIndicator.className = 'relative inline-flex rounded-full h-3 w-3 bg-slate-400';
+                DOM.statusPing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-300 opacity-75';
+                DOM.statusText.innerText = 'Awaiting media files...';
+                DOM.statusText.className = 'text-sm font-bold text-slate-500 tracking-wide';
+            }
+        };
+
+        // Real Composition Process calling Express Backend
+        DOM.composeBtn.addEventListener('click', async () => {
+            const originalText = DOM.composeBtn.innerHTML;
+            DOM.composeBtn.disabled = true;
+            DOM.composeBtn.innerHTML = `<i data-lucide="loader-2" class="w-5 h-5 animate-spin"></i> Processing...`;
+            lucide.createIcons();
+            
+            DOM.statusIndicator.className = 'relative inline-flex rounded-full h-3 w-3 bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]';
+            DOM.statusPing.className = 'animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75';
+            DOM.statusText.innerText = `Rendering ${formatTime(state.markOut - state.markIn)} clip with ${state.photos.length} photos...`;
+            DOM.statusText.className = 'text-sm font-bold text-blue-600 tracking-wide';
+
+            if(state.isPlaying) togglePlay();
+
+            // Prepare the FormData to send to our Express backend
+            const formData = new FormData();
+            formData.append('video', state.videoFile);
+            formData.append('markIn', state.markIn);
+            formData.append('markOut', state.markOut);
+            
+            state.photos.forEach(photoObj => {
+                formData.append('photos', photoObj.file);
+            });
+
+            try {
+                // Adjust the URL if the server is hosted elsewhere
+                const response = await fetch('/compose', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if(!response.ok) {
+                    throw new Error('Composition failed on the server');
+                }
+
+                const data = await response.json();
+
+                if (!data.success) {
+                    throw new Error(data.error || 'Server returned failure');
+                }
+
+                // Show Success
+                DOM.actionBar.classList.add('hidden');
+                DOM.resultSection.classList.remove('hidden');
+                setTimeout(() => DOM.resultSection.scrollIntoView({ behavior: 'smooth', block: 'end' }), 100);
+
+                // Load generated video into the player
+                DOM.resultVideoPlayer.src = data.downloadUrl || '';
+                
+                // Update the download button 
+                DOM.downloadResultBtn.onclick = () => {
+                    const a = document.createElement('a');
+                    const downloadUrl = data.downloadUrl;
+                    a.href = downloadUrl;
+                    a.download = data.filename || 'Bairan-Masterpiece.mp4';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                };
+
+            } catch (error) {
+                console.error(error);
+                alert("An error occurred during composition.");
+            } finally {
+                DOM.composeBtn.innerHTML = originalText;
+                DOM.composeBtn.disabled = false;
+                lucide.createIcons();
+                checkReadyState(); 
+            }
+        });
+
+        DOM.createAnotherBtn.addEventListener('click', () => {
+            DOM.resultSection.classList.add('hidden');
+            DOM.actionBar.classList.remove('hidden');
+            DOM.resultVideoPlayer.src = '';
+            // Reset main state
+            DOM.resetVideoBtn.click();
+            DOM.clearPhotosBtn.click();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+
+        // Sample Video Play Demo (just visual feedback)
+        document.querySelectorAll('.video-card-hover').forEach(card => {
+            card.addEventListener('click', () => {
+                card.style.transform = 'scale(0.97)';
+                setTimeout(() => card.style.transform = '', 150);
+            });
+        });
+
+    </script>
+</body>
+</html>

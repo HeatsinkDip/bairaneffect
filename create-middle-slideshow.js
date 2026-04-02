@@ -2,6 +2,7 @@ const { execSync } = require('child_process');
 const path = require('path');
 const fs = require('fs');
 const heicConvert = require('heic-convert');
+const sharp = require('sharp');
 
 const FFMPEG = 'ffmpeg';
 const IMAGES_DIR = process.argv[2] || 'middle-images';
@@ -19,7 +20,7 @@ async function createSlideshow() {
   console.log(`Output: ${OUTPUT}\n`);
 
   const files = fs.readdirSync(IMAGES_DIR)
-    .filter(f => /\.(jpg|jpeg|png|heic|HEIC|JPG|JPEG)$/.test(f))
+    .filter(f => /\.(jpg|jpeg|png|heic)$/i.test(f))
     .sort();
 
   if (files.length === 0) {
@@ -38,7 +39,7 @@ async function createSlideshow() {
     fs.mkdirSync(tempDir, { recursive: true });
   }
 
-  console.log('Converting to JPG (parallel)...');
+  console.log('Converting images to JPG (parallel, using sharp)...');
   
   const convertImage = async (file, idx) => {
     const ext = path.extname(file).toLowerCase();
@@ -48,16 +49,23 @@ async function createSlideshow() {
     try {
       if (ext === '.heic') {
         const inputBuffer = fs.readFileSync(inputPath);
-        const outputBuffer = await heicConvert({
+        const heicBuffer = await heicConvert({
           buffer: inputBuffer,
           format: 'JPEG',
           quality: 0.95
         });
-        fs.writeFileSync(jpgPath, outputBuffer);
+
+        await sharp(heicBuffer)
+          .rotate()
+          .jpeg({ quality: 95 })
+          .toFile(jpgPath);
       } else {
-        execSync(`convert "${inputPath}" "${jpgPath}"`, { stdio: 'ignore' });
+        await sharp(inputPath)
+          .rotate()
+          .jpeg({ quality: 95 })
+          .toFile(jpgPath);
       }
-      return { file, success: true };
+      return { file, success: true, jpgPath };
     } catch (e) {
       return { file, success: false, error: e.message };
     }
@@ -68,6 +76,7 @@ async function createSlideshow() {
   
   const succeeded = results.filter(r => r.success).length;
   const failed = results.filter(r => !r.success);
+  const convertedPaths = results.filter(r => r.success).map(r => r.jpgPath);
   
   console.log(`✓ Converted ${succeeded}/${files.length} images`);
   if (failed.length > 0) {
@@ -75,19 +84,23 @@ async function createSlideshow() {
   }
   console.log('');
 
+  if (convertedPaths.length === 0) {
+    throw new Error('No valid images could be converted for slideshow generation');
+  }
+
   const listFile = path.join(tempDir, 'list.txt');
   let listContent = '';
   
   for (let i = 0; i < totalFrames; i++) {
-    const imgIndex = i % files.length;
-    const imgPath = path.resolve(tempDir, `img_${String(imgIndex + 1).padStart(2, '0')}.jpg`);
+    const imgIndex = i % convertedPaths.length;
+    const imgPath = path.resolve(convertedPaths[imgIndex]);
     if (fs.existsSync(imgPath)) {
       listContent += `file '${imgPath}'\n`;
       listContent += `duration ${IMAGE_DURATION}\n`;
     }
   }
-  const lastImgIndex = totalFrames % files.length;
-  const lastImg = path.resolve(tempDir, `img_${String(lastImgIndex + 1).padStart(2, '0')}.jpg`);
+  const lastImgIndex = totalFrames % convertedPaths.length;
+  const lastImg = path.resolve(convertedPaths[lastImgIndex]);
   if (fs.existsSync(lastImg)) {
     listContent += `file '${lastImg}'\n`;
   }

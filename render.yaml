@@ -1,0 +1,11 @@
+services:
+  - type: web
+    name: bairanviraleffect-api
+    env: docker
+    region: oregon 
+    plan: free # or starter if Free runs out of resources during heavy video processing
+    branch: main
+    dockerCommand: "node server.js"
+    envVars:
+      - key: PORT
+        value: 3001

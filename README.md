@@ -38,6 +38,26 @@ npm start
 
 Server runs on `http://localhost:3001`
 
+#### Web App (Upload + Compose + Download)
+
+1. Start server:
+
+```bash
+npm start
+```
+
+2. Open in browser:
+
+```text
+http://localhost:3001
+```
+
+3. In the UI:
+- Upload one main video (`.mp4`, `.mov`, `.avi`)
+- Upload one or more photos for slideshow
+- Click **Compose Video**
+- Download the generated video from the result link
+
 #### Process Video
 
 ```bash
@@ -170,7 +190,9 @@ Server runs on `http://localhost:3001`
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/process` | Process a video |
+| POST | `/compose` | Upload video + photos and compose |
 | GET | `/download/:filename` | Download output file |
+| GET | `/download-generated/:filename` | Download generated upload output |
 | GET | `/status` | Check server status |
 
 ### Process Request

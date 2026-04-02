@@ -30,3 +30,13 @@ ffprobe
 *.dmg
 *.pkg
 tools/ffmpeg*
+
+# Python and Environment
+.venv/
+__pycache__/
+*.pyc
+
+# Project specific temporary & generated directories
+temp-requests/
+temp-debug/
+generated/
