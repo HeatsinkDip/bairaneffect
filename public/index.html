@@ -874,14 +874,15 @@
                     body: formData
                 });
 
-                if(!response.ok) {
-                    throw new Error('Composition failed on the server');
+                let data;
+                try {
+                    data = await response.json();
+                } catch (e) {
+                    throw new Error(`Server returned status ${response.status} (invalid JSON)`);
                 }
 
-                const data = await response.json();
-
-                if (!data.success) {
-                    throw new Error(data.error || 'Server returned failure');
+                if (!response.ok || !data.success) {
+                    throw new Error(data.error || 'Composition failed on the server');
                 }
 
                 // Show Success
