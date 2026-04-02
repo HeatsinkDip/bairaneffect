@@ -905,7 +905,7 @@
 
             } catch (error) {
                 console.error(error);
-                alert("An error occurred during composition.");
+                alert("An error occurred during composition: " + error.message);
             } finally {
                 DOM.composeBtn.innerHTML = originalText;
                 DOM.composeBtn.disabled = false;

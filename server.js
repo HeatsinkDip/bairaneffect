@@ -283,7 +283,8 @@ async function processUploadedVideo(videoUpload, photoUploads = []) {
       if (!allowBgFallback) {
         throw new Error(
           `Background removal/border failed: ${stepError.message}. ` +
-          'Ensure your FAL_KEY has access to fal-ai/bria/background/remove, or set ALLOW_BG_FALLBACK=true to continue without cutout sticker.'
+          'Python rembg might have crashed (Out of Memory) or failed to download its model. ' +
+          'Set ALLOW_BG_FALLBACK=true in your environment variables to continue without the cutout sticker.'
         );
       }
 
