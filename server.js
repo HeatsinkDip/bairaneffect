@@ -257,6 +257,9 @@ async function processUploadedVideo(videoUpload, photoUploads = []) {
       const proc = spawn('ffmpeg', [
         '-i', sourceVideo,
         '-c:v', 'libx264',
+        '-preset', 'fast',
+        '-crf', '26',
+        '-threads', '2',
         '-c:a', 'aac',
         '-movflags', '+faststart',
         '-y',
@@ -422,6 +425,9 @@ async function processVideo(videoPath, isUrl = false, zipPath = null, zipUrl = f
       const proc = spawn('ffmpeg', [
         '-i', videoPath,
         '-c:v', 'libx264',
+        '-preset', 'fast',
+        '-crf', '26',
+        '-threads', '2',
         '-c:a', 'aac',
         '-movflags', '+faststart',
         '-y',

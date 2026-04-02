@@ -55,20 +55,20 @@ function main() {
   // Extract last frame
   execSync(`${FFMPEG} -i "${MAIN}" -ss ${mainDur - 0.1} -vframes 1 -update 1 "${OUTPUT_DIR}/last-frame-for-loop.png" -y`, {stdio: 'inherit'});
   // Create looped video from last frame
-  execSync(`${FFMPEG} -loop 1 -i "${OUTPUT_DIR}/last-frame-for-loop.png" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -r 30 -t ${freezeDuration} "${OUTPUT_DIR}/freeze-extension.mp4" -y`, {stdio: 'inherit'});
+  execSync(`${FFMPEG} -loop 1 -i "${OUTPUT_DIR}/last-frame-for-loop.png" -c:v libx264 -preset ultrafast -threads 2 -pix_fmt yuv420p -r 30 -t ${freezeDuration} "${OUTPUT_DIR}/freeze-extension.mp4" -y`, {stdio: 'inherit'});
   // Concatenate original + freeze using filter_complex instead of concat demuxer
-  execSync(`${FFMPEG} -i "${MAIN}" -i "${OUTPUT_DIR}/freeze-extension.mp4" -filter_complex "[0:v][1:v]concat=n=2:v=1:a=0[out]" -map [out] -c:v libx264 -preset ultrafast -pix_fmt yuv420p -r 30 "${OUTPUT_DIR}/extended-main.mp4" -y`, {stdio: 'inherit'});
+  execSync(`${FFMPEG} -i "${MAIN}" -i "${OUTPUT_DIR}/freeze-extension.mp4" -filter_complex "[0:v][1:v]concat=n=2:v=1:a=0[out]" -map [out] -c:v libx264 -preset ultrafast -threads 2 -pix_fmt yuv420p -r 30 "${OUTPUT_DIR}/extended-main.mp4" -y`, {stdio: 'inherit'});
   console.log('✓ Done\n');
   
   // Step 2: Center-out using frozen main frame as background
   console.log('Step 2: Center-out curtain (frozen main frame bg)...');
   
   // Scale middle first
-  execSync(`${FFMPEG} -i "${MIDDLE}" -vf "scale=${mainW}:${mainH}:flags=lanczos,setsar=1,format=yuv420p" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -r 30 -t ${midDur} "${OUTPUT_DIR}/middle-scaled.mp4" -y`, {stdio: 'inherit'});
+  execSync(`${FFMPEG} -i "${MIDDLE}" -vf "scale=${mainW}:${mainH}:flags=lanczos,setsar=1,format=yuv420p" -c:v libx264 -preset ultrafast -threads 2 -pix_fmt yuv420p -r 30 -t ${midDur} "${OUTPUT_DIR}/middle-scaled.mp4" -y`, {stdio: 'inherit'});
   
   // Extract frozen frame from extended main and loop it with proper colorspace
   execSync(`${FFMPEG} -i "${OUTPUT_DIR}/extended-main.mp4" -ss ${mainDur - 0.1} -vframes 1 -update 1 "${OUTPUT_DIR}/frozen-frame.png" -y`, {stdio: 'inherit'});
-  execSync(`${FFMPEG} -loop 1 -i "${OUTPUT_DIR}/frozen-frame.png" -vf "format=yuv420p" -c:v libx264 -preset ultrafast -pix_fmt yuv420p -r 30 -t ${midDur} "${OUTPUT_DIR}/frozen-bg.mp4" -y`, {stdio: 'inherit'});
+  execSync(`${FFMPEG} -loop 1 -i "${OUTPUT_DIR}/frozen-frame.png" -vf "format=yuv420p" -c:v libx264 -preset ultrafast -threads 2 -pix_fmt yuv420p -r 30 -t ${midDur} "${OUTPUT_DIR}/frozen-bg.mp4" -y`, {stdio: 'inherit'});
   
   // Blend with expression - reveal from center expanding outward
   // Use frozen main frame (A) as background, middle video (B) reveals from center
@@ -81,7 +81,7 @@ function main() {
     `[bg][fg]blend=all_expr='` +
     `if(between(Y,${centerY}-(${halfH}*T/${midDur}),${centerY}+(${halfH}*T/${midDur})),B,A)'` +
     `:shortest=1[out]` +
-    `" -map [out] -c:v libx264 -preset ultrafast -pix_fmt yuv420p -r 30 -t ${midDur} "${OUTPUT_DIR}/middle-curtain.mp4" -y`, {stdio: 'inherit'});
+    `" -map [out] -c:v libx264 -preset ultrafast -threads 2 -pix_fmt yuv420p -r 30 -t ${midDur} "${OUTPUT_DIR}/middle-curtain.mp4" -y`, {stdio: 'inherit'});
   console.log('✓ Done\n');
   
   // Step 3: Compose final
@@ -91,7 +91,7 @@ function main() {
     `[2:v]loop=-1:1,setpts=PTS+${mainDur}/TB,scale='trunc(iw*max(0.6,1-0.4*(t-${mainDur})/(${total}-${mainDur}))/2)*2:trunc(ih*max(0.6,1-0.4*(t-${mainDur})/(${total}-${mainDur}))/2)*2':eval=frame[sticker];` +
     `[0:v][mid]overlay=0:0:shortest=1[tmp];` +
     `[tmp][sticker]overlay=(W-w)/2:H-h:shortest=1[out]` +
-    `" -map [out] -c:v libx264 -pix_fmt yuv420p -r 30 -t ${total} "${OUTPUT}" -y`, {stdio: 'inherit'});
+    `" -map [out] -c:v libx264 -preset fast -threads 2 -pix_fmt yuv420p -r 30 -t ${total} "${OUTPUT}" -y`, {stdio: 'inherit'});
   
   console.log('\n✅ Done!');
   console.log(`🎉 ${OUTPUT}`);

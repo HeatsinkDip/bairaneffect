@@ -71,8 +71,10 @@ async function createSlideshow() {
     }
   };
   
-  const convertPromises = files.map((file, idx) => convertImage(file, idx + 1));
-  const results = await Promise.all(convertPromises);
+  const results = [];
+  for (let i = 0; i < files.length; i++) {
+    results.push(await convertImage(files[i], i + 1));
+  }
   
   const succeeded = results.filter(r => r.success).length;
   const failed = results.filter(r => !r.success);
